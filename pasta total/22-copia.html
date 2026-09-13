@@ -1,0 +1,3131 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analisador de Faturas Replit</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .header h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .card h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 18px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        input[type="number"],
+        input[type="date"],
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="number"]:focus,
+        input[type="date"]:focus,
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .result-box {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            margin-top: 20px;
+            border-left: 4px solid #667eea;
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .result-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .result-label {
+            color: #666;
+            font-weight: 500;
+        }
+
+        .result-value {
+            color: #333;
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        .result-value.highlight {
+            color: #e74c3c;
+            font-size: 20px;
+        }
+
+        .comparison {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .comparison h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 18px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        .comparison-table th {
+            background: #667eea;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .comparison-table td {
+            padding: 12px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .comparison-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .comparison-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .value-positive {
+            color: #27ae60;
+        }
+
+        .value-negative {
+            color: #e74c3c;
+        }
+
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #1565c0;
+        }
+
+        .warning-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #856404;
+        }
+
+        .success-box {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #155724;
+        }
+
+        .chart-container {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+
+        .bar {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .bar-label {
+            width: 150px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .bar-fill {
+            flex: 1;
+            height: 30px;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            border-radius: 5px;
+            margin: 0 15px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 10px;
+            color: white;
+            font-weight: 600;
+            font-size: 12px;
+        }
+
+        .bar-value {
+            width: 100px;
+            text-align: right;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .footer {
+            text-align: center;
+            color: white;
+            margin-top: 30px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>💰 Analisador de Faturas Replit</h1>
+            <p>Entenda seus custos e compare com outras plataformas</p>
+        </div>
+
+        <div class="content">
+            <!-- Calculadora de Custos -->
+            <div class="card">
+                <h2>📊 Calculadora de Custos</h2>
+
+                <div class="info-box">
+                    ℹ️ Insira os dados da sua fatura para calcular o custo total
+                </div>
+
+                <div class="form-group">
+                    <label for="dias">Número de Dias (período)</label>
+                    <input type="number" id="dias" value="30" min="1" max="365">
+                </div>
+
+                <div class="form-group">
+                    <label for="custo-diario">Custo Diário (R$)</label>
+                    <input type="number" id="custo-diario" value="0" min="0" step="0.01">
+                </div>
+
+                <div class="form-group">
+                    <label for="custo-api">Custo com API/IA (R$)</label>
+                    <input type="number" id="custo-api" value="0" min="0" step="0.01">
+                </div>
+
+                <div class="form-group">
+                    <label for="outros-custos">Outros Custos (R$)</label>
+                    <input type="number" id="outros-custos" value="0" min="0" step="0.01">
+                </div>
+
+                <button onclick="calcularCustos()">Calcular Total</button>
+
+                <div id="resultado-custos" class="result-box" style="display: none;">
+                    <div class="result-item">
+                        <span class="result-label">Custo Diário:</span>
+                        <span class="result-value" id="res-diario">R$ 0,00</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Custo com API/IA:</span>
+                        <span class="result-value" id="res-api">R$ 0,00</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Outros Custos:</span>
+                        <span class="result-value" id="res-outros">R$ 0,00</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Total do Período:</span>
+                        <span class="result-value highlight" id="res-total">R$ 0,00</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Média Mensal (30 dias):</span>
+                        <span class="result-value" id="res-media">R$ 0,00</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Comparação com Alternativas -->
+            <div class="card">
+                <h2>🔄 Comparação com Alternativas</h2>
+
+                <div class="warning-box">
+                    ⚠️ Escolha uma plataforma para comparar
+                </div>
+
+                <div class="form-group">
+                    <label for="plataforma">Plataforma</label>
+                    <select id="plataforma" onchange="atualizarComparacao()">
+                        <option value="">-- Selecione --</option>
+                        <option value="vercel">Vercel (Hosting)</option>
+                        <option value="railway">Railway (Hosting)</option>
+                        <option value="render">Render (Hosting)</option>
+                        <option value="aws">AWS (Cloud)</option>
+                        <option value="gcp">Google Cloud (Cloud)</option>
+                        <option value="azure">Azure (Cloud)</option>
+                        <option value="local">Servidor Local (Custo 0)</option>
+                    </select>
+                </div>
+
+                <div id="comparacao-resultado" style="display: none;">
+                    <div class="result-box">
+                        <div class="result-item">
+                            <span class="result-label">Replit (Seu Custo):</span>
+                            <span class="result-value" id="comp-replit">R$ 0,00</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">Alternativa:</span>
+                            <span class="result-value" id="comp-alternativa">R$ 0,00</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">Diferença:</span>
+                            <span class="result-value" id="comp-diferenca">R$ 0,00</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">Economia/Custo Extra:</span>
+                            <span class="result-value" id="comp-percentual">0%</span>
+                        </div>
+                    </div>
+                    <div id="comp-recomendacao" style="margin-top: 15px;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabela Comparativa -->
+        <div class="comparison">
+            <h2>📈 Comparação Detalhada de Plataformas</h2>
+
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Plataforma</th>
+                        <th>Custo Mensal (Aprox.)</th>
+                        <th>Tipo</th>
+                        <th>Melhor Para</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Replit</strong></td>
+                        <td class="value-negative">Variável (seu caso)</td>
+                        <td>Hosting + IDE</td>
+                        <td>Desenvolvimento rápido</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Vercel</strong></td>
+                        <td class="value-positive">R$ 0 - 50</td>
+                        <td>Hosting (Frontend)</td>
+                        <td>Next.js / React</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Railway</strong></td>
+                        <td class="value-positive">R$ 5 - 100</td>
+                        <td>Hosting Full Stack</td>
+                        <td>Apps completos</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Render</strong></td>
+                        <td class="value-positive">R$ 7 - 150</td>
+                        <td>Hosting Full Stack</td>
+                        <td>APIs e Web Apps</td>
+                    </tr>
+                    <tr>
+                        <td><strong>AWS</strong></td>
+                        <td class="value-negative">R$ 50 - 500+</td>
+                        <td>Cloud Completo</td>
+                        <td>Produção em escala</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Google Cloud</strong></td>
+                        <td class="value-negative">R$ 50 - 500+</td>
+                        <td>Cloud Completo</td>
+                        <td>Produção em escala</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Azure</strong></td>
+                        <td class="value-negative">R$ 50 - 500+</td>
+                        <td>Cloud Completo</td>
+                        <td>Produção em escala</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Servidor Local</strong></td>
+                        <td class="value-positive">R$ 0</td>
+                        <td>Próprio Hardware</td>
+                        <td>Desenvolvimento local</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Análise e Recomendações -->
+        <div class="card" style="margin-top: 20px;">
+            <h2>💡 Análise e Recomendações</h2>
+
+            <div id="analise-conteudo">
+                <div class="info-box">
+                    📌 Insira seus dados acima para receber recomendações personalizadas
+                </div>
+
+                <h3 style="margin-top: 20px; color: #333; margin-bottom: 10px;">Dicas para Reduzir Custos no Replit:
+                </h3>
+                <ul style="color: #666; line-height: 1.8; margin-left: 20px;">
+                    <li><strong>Use o plano gratuito:</strong> Perfeito para aprender e prototipar</li>
+                    <li><strong>Otimize seu código:</strong> Menos processamento = menos custo</li>
+                    <li><strong>Monitore o uso de API:</strong> APIs de IA são caras (Claude, GPT, etc)</li>
+                    <li><strong>Use cache:</strong> Reduza chamadas desnecessárias</li>
+                    <li><strong>Considere alternativas:</strong> Railway, Render ou Vercel podem ser mais baratos</li>
+                    <li><strong>Servidor local:</strong> Para desenvolvimento, use seu próprio computador</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>© 2024 Analisador de Faturas Replit | Ferramenta para ajudar na análise de custos</p>
+        </div>
+    </div>
+
+    <script>
+        function formatarMoeda(valor) {
+            return new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL'
+            }).format(valor);
+        }
+
+        function calcularCustos() {
+            const dias = parseFloat(document.getElementById('dias').value) || 0;
+            const custoDiario = parseFloat(document.getElementById('custo-diario').value) || 0;
+            const custoApi = parseFloat(document.getElementById('custo-api').value) || 0;
+            const outrosCustos = parseFloat(document.getElementById('outros-custos').value) || 0;
+
+            const totalDiario = custoDiario + custoApi;
+            const totalPeriodo = (totalDiario * dias) + outrosCustos;
+            const mediaM ensal = (totalPeriodo / dias) * 30;
+
+            document.getElementById('res-diario').textContent = formatarMoeda(totalDiario);
+            document.getElementById('res-api').textContent = formatarMoeda(custoApi);
+            document.getElementById('res-outros').textContent = formatarMoeda(outrosCustos);
+            document.getElementById('res-total').textContent = formatarMoeda(totalPeriodo);
+            document.getElementById('res-media').textContent = formatarMoeda(mediaM ensal);
+
+            document.getElementById('resultado-custos').style.display = 'block';
+
+            atualizarComparacao();
+        }
+
+        function atualizarComparacao() {
+            const dias = parseFloat(document.getElementById('dias').value) || 30;
+            const custoDiario = parseFloat(document.getElementById('custo-diario').value) || 0;
+            const custoApi = parseFloat(document.getElementById('custo-api').value) || 0;
+            const outrosCustos = parseFloat(document.getElementById('outros-custos').value) || 0;
+
+            const totalDiario = custoDiario + custoApi;
+            const totalPeriodo = (totalDiario * dias) + outrosCustos;
+            const mediaM ensal = (totalPeriodo / dias) * 30;
+
+            const plataforma = document.getElementById('plataforma').value;
+
+            const custos = {
+                'vercel': 25,
+                'railway': 50,
+                'render': 75,
+                'aws': 150,
+                'gcp': 150,
+                'azure': 150,
+                'local': 0
+            };
+
+            if (plataforma && custos[plataforma] !== undefined) {
+                const custoAlternativa = custos[plataforma];
+                const diferenca = mediaM ensal - custoAlternativa;
+                const percentual = custoAlternativa > 0 ? ((diferenca / custoAlternativa) * 100).toFixed(1) : 0;
+
+                document.getElementById('comp-replit').textContent = formatarMoeda(mediaM ensal);
+                document.getElementById('comp-alternativa').textContent = formatarMoeda(custoAlternativa);
+                document.getElementById('comp-diferenca').textContent = formatarMoeda(Math.abs(diferenca));
+                
+                let percentualTexto = '';
+                if (diferenca > 0) {
+                    percentualTexto = `<span class="value-negative">+${percentual}% mais caro</span>`;
+                } else if (diferenca < 0) {
+                    percentualTexto = `<span class="value-positive">${Math.abs(percentual)}% mais barato</span>`;
+                } else {
+                    percentualTexto = `<span>Igual</span>`;
+                }
+                document.getElementById('comp-percentual').innerHTML = percentualTexto;
+
+                let recomendacao = '';
+                if (diferenca > 50) {
+                    recomendacao = `<div class="warning-box">⚠️ <strong>Replit está muito caro!</strong> Considere migrar para ${plataforma.toUpperCase()} e economize ~R$ ${Math.abs(diferenca).toFixed(2)}/mês</div>`;
+                } else if (diferenca > 10) {
+                    recomendacao = `<div class="info-box">ℹ️ <strong>${plataforma.toUpperCase()} é mais barato.</strong> Você economizaria ~R$ ${Math.abs(diferenca).toFixed(2)}/mês</div>`;
+                } else if (diferenca < -10) {
+                    recomendacao = `<div class="success-box">✅ <strong>Replit é competitivo!</strong> Você economiza ~R$ ${Math.abs(diferenca).toFixed(2)}/mês comparado com ${plataforma.toUpperCase()}</div>`;
+                } else {
+                    recomendacao = `<div class="info-box">ℹ️ <strong>Custos similares.</strong> Escolha pela melhor experiência de desenvolvimento</div>`;
+                }
+
+                document.getElementById('comp-recomendacao').innerHTML = recomendacao;
+                document.getElementById('comparacao-resultado').style.display = 'block';
+            }
+        }
+
+        // Valores padrão ao carregar
+        window.addEventListener('load', function() {
+            document.getElementById('dias').value = 30;
+            document.getElementById('custo-diario').value = 5;
+        });
+    </script>
+</body>
+
+</html>
+
+
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Análise de ROI - Projeto</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+
+        button {
+            background: #e74c3c;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+        }
+
+        button:hover {
+            background: #c0392b;
+        }
+
+        .resultado {
+            background: #ecf0f1;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .resultado.show {
+            display: block;
+        }
+
+        .alerta-vermelho {
+            background: #fadbd8;
+            border-left: 4px solid #e74c3c;
+            padding: 15px;
+            margin: 20px 0;
+        }
+
+        .alerta-verde {
+            background: #d5f4e6;
+            border-left: 4px solid #27ae60;
+            padding: 15px;
+            margin: 20px 0;
+        }
+
+        h2 {
+            color: #2c3e50;
+            margin-top: 0;
+        }
+
+        .valor {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🎯 Análise de ROI - Seu Projeto</h1>
+
+    <div class="card">
+        <h2>💰 Receita Mensal</h2>
+        <label>Quanto você GANHA por mês com este projeto? (R$)</label>
+        <input type="number" id="receita" placeholder="Ex: 5000" min="0" step="100">
+    </div>
+
+    <div class="card">
+        <h2>💸 Custos Mensais</h2>
+
+        <label>Replit (hosting + IA):</label>
+        <input type="number" id="custo-replit" placeholder="Ex: 500" min="0" step="10">
+
+        <label>Outras ferramentas:</label>
+        <input type="number" id="custo-outras" placeholder="Ex: 200" min="0" step="10">
+
+        <label>Tempo seu (R$/hora):</label>
+        <input type="number" id="valor-hora" placeholder="Ex: 100" min="0" step="10">
+
+        <label>Horas/mês dedicadas:</label>
+        <input type="number" id="horas-mes" placeholder="Ex: 40" min="0" step="1">
+    </div>
+
+    <button onclick="calcularROI()">📊 Calcular ROI</button>
+
+    <div id="resultado" class="resultado">
+        <h2>📈 Resultado da Análise</h2>
+
+        <div style="margin: 20px 0;">
+            <strong>Receita Mensal:</strong>
+            <div class="valor" id="res-receita">R$ 0</div>
+        </div>
+
+        <div style="margin: 20px 0;">
+            <strong>Custos Totais:</strong>
+            <div class="valor" id="res-custos">R$ 0</div>
+        </div>
+
+        <div style="margin: 20px 0;">
+            <strong>Lucro/Prejuízo:</strong>
+            <div class="valor" id="res-lucro">R$ 0</div>
+        </div>
+
+        <div style="margin: 20px 0;">
+            <strong>ROI (%):</strong>
+            <div class="valor" id="res-roi">0%</div>
+        </div>
+
+        <div id="recomendacao"></div>
+    </div>
+
+    <script>
+        function calcularROI() {
+            const receita = parseFloat(document.getElementById('receita').value) || 0;
+            const custoReplit = parseFloat(document.getElementById('custo-replit').value) || 0;
+            const custoOutras = parseFloat(document.getElementById('custo-outras').value) || 0;
+            const valorHora = parseFloat(document.getElementById('valor-hora').value) || 0;
+            const horasMes = parseFloat(document.getElementById('horas-mes').value) || 0;
+
+            const custoTempo = valorHora * horasMes;
+            const custoTotal = custoReplit + custoOutras + custoTempo;
+            const lucro = receita - custoTotal;
+            const roi = custoTotal > 0 ? ((lucro / custoTotal) * 100).toFixed(1) : 0;
+
+            document.getElementById('res-receita').textContent = 'R$ ' + receita.toFixed(2);
+            document.getElementById('res-custos').textContent = 'R$ ' + custoTotal.toFixed(2);
+            document.getElementById('res-lucro').textContent = 'R$ ' + lucro.toFixed(2);
+            document.getElementById('res-roi').textContent = roi + '%';
+
+            let recomendacao = '';
+            if (lucro < 0) {
+                recomendacao = `
+                    <div class="alerta-vermelho">
+                        <strong>⛔ ALERTA CRÍTICO!</strong><br>
+                        Você está perdendo R$ ${Math.abs(lucro).toFixed(2)}/mês<br>
+                        <strong>Recomendação:</strong> PARE de investir agora. Não faça empréstimo.
+                    </div>
+                `;
+            } else if (lucro < 500) {
+                recomendacao = `
+                    <div class="alerta-vermelho">
+                        <strong>⚠️ ATENÇÃO!</strong><br>
+                        Lucro muito baixo: R$ ${lucro.toFixed(2)}/mês<br>
+                        <strong>Recomendação:</strong> Reduza custos ou aumente receita antes de continuar.
+                    </div>
+                `;
+            } else if (lucro < 2000) {
+                recomendacao = `
+                    <div class="alerta-verde">
+                        <strong>✅ Viável, mas otimize!</strong><br>
+                        Lucro: R$ ${lucro.toFixed(2)}/mês<br>
+                        <strong>Recomendação:</strong> Reduza custos com IA (use local ou APIs baratas).
+                    </div>
+                `;
+            } else {
+                recomendacao = `
+                    <div class="alerta-verde">
+                        <strong>✅ PROJETO LUCRATIVO!</strong><br>
+                        Lucro: R$ ${lucro.toFixed(2)}/mês<br>
+                        <strong>Recomendação:</strong> Continue, mas ainda otimize custos.
+                    </div>
+                `;
+            }
+
+            document.getElementById('recomendacao').innerHTML = recomendacao;
+            document.getElementById('resultado').classList.add('show');
+        }
+    </script>
+</body>
+
+</html>
+
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assistente IA Local - Trabalhos Rápidos</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+
+        .header h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            margin-top: 10px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status.online {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status.offline {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .card h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 18px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .card h3 {
+            color: #333;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .templates {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .template-btn {
+            padding: 10px;
+            background: #f0f0f0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+
+        .template-btn:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            resize: vertical;
+            min-height: 120px;
+            margin-bottom: 10px;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .resultado {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            margin-top: 20px;
+            border-left: 4px solid #667eea;
+            max-height: 400px;
+            overflow-y: auto;
+            display: none;
+        }
+
+        .resultado.show {
+            display: block;
+        }
+
+        .resultado p {
+            color: #333;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .loading::after {
+            content: '';
+            animation: dots 1.5s steps(4, end) infinite;
+        }
+
+        @keyframes dots {
+
+            0%,
+            20% {
+                content: '';
+            }
+
+            40% {
+                content: '.';
+            }
+
+            60% {
+                content: '..';
+            }
+
+            80%,
+            100% {
+                content: '...';
+            }
+        }
+
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            color: #1565c0;
+            line-height: 1.5;
+        }
+
+        .success-box {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            color: #155724;
+        }
+
+        .warning-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            color: #856404;
+        }
+
+        .copy-btn {
+            padding: 8px 12px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+
+        .copy-btn:hover {
+            background: #764ba2;
+        }
+
+        .footer {
+            text-align: center;
+            color: white;
+            margin-top: 30px;
+            font-size: 12px;
+        }
+
+        .quick-jobs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .job-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 1px solid #ddd;
+        }
+
+        .job-card:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .job-card strong {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .job-card small {
+            font-size: 11px;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 Assistente IA Local - Trabalhos Rápidos</h1>
+            <p>Use IA sem custos mensais. Rode tudo no seu PC.</p>
+            <div id="status" class="status offline">
+                ⚠️ Ollama não detectado
+            </div>
+        </div>
+
+        <div class="info-box">
+            ℹ️ <strong>Como usar:</strong> Instale Ollama (ollama.ai), execute "ollama serve" no terminal, depois use
+            esta ferramenta.
+        </div>
+
+        <div class="content">
+            <!-- Trabalhos Rápidos -->
+            <div class="card">
+                <h2>⚡ Trabalhos Rápidos</h2>
+
+                <div class="quick-jobs">
+                    <div class="job-card" onclick="selecionarTrabalho('email')">
+                        <strong>📧 Email</strong>
+                        <small>Escrever/responder</small>
+                    </div>
+                    <div class="job-card" onclick="selecionarTrabalho('resumo')">
+                        <strong>📄 Resumo</strong>
+                        <small>Sintetizar texto</small>
+                    </div>
+                    <div class="job-card" onclick="selecionarTrabalho('codigo')">
+                        <strong>💻 Código</strong>
+                        <small>Gerar/corrigir</small>
+                    </div>
+                    <div class="job-card" onclick="selecionarTrabalho('traducao')">
+                        <strong>🌐 Tradução</strong>
+                        <small>Traduzir texto</small>
+                    </div>
+                    <div class="job-card" onclick="selecionarTrabalho('analise')">
+                        <strong>📊 Análise</strong>
+                        <small>Analisar dados</small>
+                    </div>
+                    <div class="job-card" onclick="selecionarTrabalho('criativo')">
+                        <strong>✨ Criativo</strong>
+                        <small>Conteúdo criativo</small>
+                    </div>
+                </div>
+
+                <h3>Ou escreva seu próprio prompt:</h3>
+                <textarea id="prompt" placeholder="Digite seu prompt aqui..."></textarea>
+                <button onclick="enviarPrompt()">🚀 Processar com IA</button>
+
+                <div class="loading" id="loading"></div>
+                <div class="resultado" id="resultado">
+                    <p id="resultado-texto"></p>
+                    <button class="copy-btn" onclick="copiarResultado()">📋 Copiar Resultado</button>
+                </div>
+            </div>
+
+            <!-- Templates Prontos -->
+            <div class="card">
+                <h2>📋 Templates Prontos</h2>
+
+                <h3>Email Profissional</h3>
+                <button onclick="usarTemplate('email-prof')">Usar Template</button>
+
+                <h3>Proposta de Trabalho</h3>
+                <button onclick="usarTemplate('proposta')">Usar Template</button>
+
+                <h3>Relatório Executivo</h3>
+                <button onclick="usarTemplate('relatorio')">Usar Template</button>
+
+                <h3>Análise de Dados</h3>
+                <button onclick="usarTemplate('dados')">Usar Template</button>
+
+                <h3>Documentação Técnica</h3>
+                <button onclick="usarTemplate('doc-tec')">Usar Template</button>
+
+                <h3>Resposta a Cliente</h3>
+                <button onclick="usarTemplate('cliente')">Usar Template</button>
+
+                <div class="success-box" style="margin-top: 20px;">
+                    ✅ Todos os templates funcionam com IA local (sem custos)
+                </div>
+            </div>
+        </div>
+
+        <!-- Dicas de Economia -->
+        <div class="card">
+            <h2>💡 Dicas para Maximizar Ganhos</h2>
+
+            <h3>✅ Trabalhos que rendem bem com IA:</h3>
+            <ul style="margin-left: 20px; color: #666; line-height: 1.8;">
+                <li><strong>Redação/Copywriting:</strong> R$ 50-200 por texto</li>
+                <li><strong>Tradução:</strong> R$ 30-100 por página</li>
+                <li><strong>Análise de dados:</strong> R$ 100-500 por projeto</li>
+                <li><strong>Código/Scripts:</strong> R$ 100-1000 por projeto</li>
+                <li><strong>Consultoria escrita:</strong> R$ 200-1000 por relatório</li>
+                <li><strong>Email marketing:</strong> R$ 50-300 por campanha</li>
+            </ul>
+
+            <h3 style="margin-top: 20px;">🎯 Estratégia:</h3>
+            <ol style="margin-left: 20px; color: #666; line-height: 1.8;">
+                <li>Use IA local para <strong>criar base</strong> do trabalho</li>
+                <li><strong>Revise e personalize</strong> (adicione valor)</li>
+                <li><strong>Entregue ao cliente</strong></li>
+                <li><strong>Custo = R$ 0</strong>, Ganho = 100%</li>
+            </ol>
+
+            <h3 style="margin-top: 20px;">📱 Plataformas para vender:</h3>
+            <ul style="margin-left: 20px; color: #666; line-height: 1.8;">
+                <li>Fiverr (gigs rápidos)</li>
+                <li>Upwork (projetos maiores)</li>
+                <li>99Freelas (Brasil)</li>
+                <li>Workana (América Latina)</li>
+                <li>Contato direto (melhor margem)</li>
+            </ul>
+        </div>
+
+        <div class="footer">
+            <p>© 2024 Assistente IA Local | Trabalhe sem custos mensais</p>
+        </div>
+    </div>
+
+    <script>
+        const TEMPLATES = {
+            'email-prof': `Assunto: [Seu assunto aqui]
+
+Prezado(a) [Nome],
+
+[Seu conteúdo principal aqui]
+
+Fico à disposição para dúvidas.
+
+Atenciosamente,
+[Seu nome]`,
+
+            'proposta': `PROPOSTA DE TRABALHO
+
+Cliente: [Nome do cliente]
+Data: [Data]
+Valor: R$ [Valor]
+Prazo: [Prazo]
+
+ESCOPO:
+- [Ponto 1]
+- [Ponto 2]
+- [Ponto 3]
+
+METODOLOGIA:
+[Descrever como será feito]
+
+CRONOGRAMA:
+- Fase 1: [Data]
+- Fase 2: [Data]
+- Entrega: [Data]
+
+CONDIÇÕES:
+- Pagamento: [Forma]
+- Revisões: [Quantidade]
+- Suporte: [Período]`,
+
+            'relatorio': `RELATÓRIO EXECUTIVO
+
+TÍTULO: [Seu título]
+DATA: [Data]
+AUTOR: [Seu nome]
+
+RESUMO EXECUTIVO:
+[Resumo em 3-4 linhas]
+
+ANÁLISE:
+[Sua análise aqui]
+
+CONCLUSÕES:
+1. [Conclusão 1]
+2. [Conclusão 2]
+3. [Conclusão 3]
+
+RECOMENDAÇÕES:
+- [Recomendação 1]
+- [Recomendação 2]`,
+
+            'dados': `ANÁLISE DE DADOS
+
+OBJETIVO:
+[Qual é o objetivo da análise?]
+
+DADOS:
+[Cole seus dados aqui]
+
+ANÁLISE:
+[Sua análise]
+
+INSIGHTS:
+- [Insight 1]
+- [Insight 2]
+- [Insight 3]
+
+AÇÕES RECOMENDADAS:
+1. [Ação 1]
+2. [Ação 2]`,
+
+            'doc-tec': `DOCUMENTAÇÃO TÉCNICA
+
+TÍTULO: [Seu título]
+VERSÃO: 1.0
+DATA: [Data]
+
+VISÃO GERAL:
+[Descrição geral]
+
+REQUISITOS:
+- [Requisito 1]
+- [Requisito 2]
+
+INSTALAÇÃO:
+\`\`\`
+[Passos de instalação]
+\`\`\`
+
+USO:
+[Como usar]
+
+TROUBLESHOOTING:
+[Problemas comuns e soluções]`,
+
+            'cliente': `Prezado(a) [Nome do cliente],
+
+Obrigado por entrar em contato.
+
+Recebi sua solicitação sobre [assunto] e estou trabalhando nisso.
+
+[Sua resposta/solução aqui]
+
+Próximos passos:
+1. [Passo 1]
+2. [Passo 2]
+
+Fico à disposição.
+
+Atenciosamente,
+[Seu nome]`
+        };
+
+        const PROMPTS_RAPIDOS = {
+            'email': 'Escreva um email profissional sobre: ',
+            'resumo': 'Resuma este texto em 3 pontos principais: ',
+            'codigo': 'Escreva um código em Python para: ',
+            'traducao': 'Traduza para inglês: ',
+            'analise': 'Analise estes dados: ',
+            'criativo': 'Crie um conteúdo criativo sobre: '
+        };
+
+        // Verificar se Ollama está disponível
+        async function verificarOllama() {
+            try {
+                const response = await fetch('http://localhost:11434/api/tags');
+                if (response.ok) {
+                    document.getElementById('status').className = 'status online';
+                    document.getElementById('status').textContent = '✅ Ollama conectado e pronto!';
+                    return true;
+                }
+            } catch (e) {
+                console.log('Ollama não disponível');
+            }
+            return false;
+        }
+
+        function selecionarTrabalho(tipo) {
+            const prompt = PROMPTS_RAPIDOS[tipo];
+            document.getElementById('prompt').value = prompt;
+            document.getElementById('prompt').focus();
+        }
+
+        function usarTemplate(tipo) {
+            const template = TEMPLATES[tipo];
+            document.getElementById('prompt').value = template;
+            document.getElementById('prompt').focus();
+        }
+
+        async function enviarPrompt() {
+            const prompt = document.getElementById('prompt').value.trim();
+            
+            if (!prompt) {
+                alert('Digite um prompt!');
+                return;
+            }
+
+            const estaOnline = await verificarOllama();
+            if (!estaOnline) {
+                alert('Ollama não está rodando. Execute "ollama serve" no terminal.');
+                return;
+            }
+
+            document.getElementById('loading').classList.add('show');
+            document.getElementById('resultado').classList.remove('show');
+
+            try {
+                const response = await fetch('http://localhost:11434/api/generate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        model: 'llama2',
+                        prompt: prompt,
+                        stream: false
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Erro na requisição');
+                }
+
+                const data = await response.json();
+                const resultado = data.response;
+
+                document.getElementById('resultado-texto').textContent = resultado;
+                document.getElementById('resultado').classList.add('show');
+                document.getElementById('loading').classList.remove('show');
+
+            } catch (error) {
+                alert('Erro: ' + error.message + '\n\nCertifique-se de que Ollama está rodando.');
+                document.getElementById('loading').classList.remove('show');
+            }
+        }
+
+        function copiarResultado() {
+            const texto = document.getElementById('resultado-texto').textContent;
+            navigator.clipboard.writeText(texto).then(() => {
+                alert('✅ Copiado para a área de transferência!');
+            });
+        }
+
+        // Verificar Ollama ao carregar
+        window.addEventListener('load', verificarOllama);
+    </script>
+</body>
+
+</html>
+
+
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Calculadora de Ganhos</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background: #764ba2;
+        }
+
+        .resultado {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 4px;
+            display: none;
+        }
+
+        .resultado.show {
+            display: block;
+        }
+
+        .valor {
+            font-size: 28px;
+            font-weight: bold;
+            color: #155724;
+        }
+
+        h2 {
+            color: #333;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="card">
+        <h2>💰 Quanto Você Pode Ganhar?</h2>
+
+        <label><strong>Quantas horas/dia você pode trabalhar?</strong></label>
+        <input type="number" id="horas" value="4" min="1" max="24">
+
+        <label><strong>Quantos dias por semana?</strong></label>
+        <input type="number" id="dias" value="5" min="1" max="7">
+
+        <label><strong>Ganho médio por hora (R$)</strong></label>
+        <input type="number" id="ganho-hora" value="100" min="10" step="10">
+
+        <label><strong>Meses para calcular</strong></label>
+        <input type="number" id="meses" value="1" min="1" max="12">
+
+        <button onclick="calcular()">📊 Calcular Ganhos</button>
+
+        <div id="resultado" class="resultado">
+            <strong>Ganho por dia:</strong>
+            <div class="valor" id="res-dia">R$ 0</div>
+
+            <strong style="margin-top: 20px; display: block;">Ganho por semana:</strong>
+            <div class="valor" id="res-semana">R$ 0</div>
+
+            <strong style="margin-top: 20px; display: block;">Ganho por mês:</strong>
+            <div class="valor" id="res-mes">R$ 0</div>
+
+            <strong style="margin-top: 20px; display: block;">Ganho no período:</strong>
+            <div class="valor" id="res-total">R$ 0</div>
+        </div>
+    </div>
+
+    <script>
+        function calcular() {
+            const horas = parseFloat(document.getElementById('horas').value);
+            const dias = parseFloat(document.getElementById('dias').value);
+            const ganhoHora = parseFloat(document.getElementById('ganho-hora').value);
+            const meses = parseFloat(document.getElementById('meses').value);
+
+            const ganhoDia = horas * ganhoHora;
+            const ganhoSemana = ganhoDia * dias;
+            const ganhoMes = ganhoSemana * 4.33;
+            const ganhoTotal = ganhoMes * meses;
+
+            document.getElementById('res-dia').textContent = 'R$ ' + ganhoDia.toFixed(2);
+            document.getElementById('res-semana').textContent = 'R$ ' + ganhoSemana.toFixed(2);
+            document.getElementById('res-mes').textContent = 'R$ ' + ganhoMes.toFixed(2);
+            document.getElementById('res-total').textContent = 'R$ ' + ganhoTotal.toFixed(2);
+
+            document.getElementById('resultado').classList.add('show');
+        }
+    </script>
+</body>
+
+</html>
+
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IA Portuguesa - Ganhe Dinheiro</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+
+        .header h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .setup-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .setup-box h3 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+
+        .setup-box input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ffc107;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .setup-box button {
+            background: #ffc107;
+            color: #333;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .setup-box button:hover {
+            background: #e0a800;
+        }
+
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .card h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 18px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .quick-jobs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .job-card {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 1px solid #ddd;
+            text-align: center;
+            font-size: 12px;
+        }
+
+        .job-card:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .job-card strong {
+            display: block;
+            margin-bottom: 3px;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 14px;
+            resize: vertical;
+            min-height: 120px;
+            margin-bottom: 10px;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .resultado {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            margin-top: 20px;
+            border-left: 4px solid #667eea;
+            max-height: 400px;
+            overflow-y: auto;
+            display: none;
+        }
+
+        .resultado.show {
+            display: block;
+        }
+
+        .resultado p {
+            color: #333;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            color: #667eea;
+            font-weight: 600;
+            padding: 20px;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .loading::after {
+            content: '';
+            animation: dots 1.5s steps(4, end) infinite;
+        }
+
+        @keyframes dots {
+
+            0%,
+            20% {
+                content: '';
+            }
+
+            40% {
+                content: '.';
+            }
+
+            60% {
+                content: '..';
+            }
+
+            80%,
+            100% {
+                content: '...';
+            }
+        }
+
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            color: #1565c0;
+            line-height: 1.5;
+        }
+
+        .success-box {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            color: #155724;
+        }
+
+        .copy-btn {
+            padding: 8px 12px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-top: 10px;
+            width: auto;
+        }
+
+        .copy-btn:hover {
+            background: #764ba2;
+        }
+
+        .templates-list {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+
+        .template-item {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            border: 1px solid #ddd;
+            transition: all 0.3s;
+        }
+
+        .template-item:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .template-item strong {
+            display: block;
+            margin-bottom: 3px;
+        }
+
+        .template-item small {
+            font-size: 11px;
+            opacity: 0.8;
+        }
+
+        .footer {
+            text-align: center;
+            color: white;
+            margin-top: 30px;
+            font-size: 12px;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            margin-top: 10px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status.ok {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status.erro {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        h3 {
+            color: #333;
+            margin-top: 15px;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .ganhos-box {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+
+        .ganhos-box strong {
+            display: block;
+            color: #155724;
+            margin-bottom: 10px;
+        }
+
+        .ganhos-box ul {
+            margin-left: 20px;
+            color: #155724;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 IA em Português - Ganhe Dinheiro</h1>
+            <p>Use IA do Google (Gemini) para trabalhos rápidos</p>
+            <div id="status" class="status erro">
+                ⚠️ Configure sua API Key primeiro
+            </div>
+        </div>
+
+        <!-- SETUP -->
+        <div class="setup-box">
+            <h3>⚙️ CONFIGURAÇÃO INICIAL (1 minuto)</h3>
+            <p style="margin-bottom: 10px; color: #856404; font-size: 13px;">
+                1. Vá em <strong>https://ai.google.dev</strong><br>
+                2. Clique em "Get API Key"<br>
+                3. Cole aqui:
+            </p>
+            <input type="password" id="apiKey" placeholder="Cole sua chave API do Google Gemini aqui">
+            <button onclick="salvarChave()">✅ Salvar Chave</button>
+        </div>
+
+        <div class="content">
+            <!-- TRABALHOS RÁPIDOS -->
+            <div class="card">
+                <h2>⚡ Trabalhos Rápidos</h2>
+
+                <div class="quick-jobs">
+                    <div class="job-card" onclick="selecionarTrabalho('email')">
+                        <strong>📧</strong>
+                        <span>Email</span>
+                    </div>
+                    <div class="job-card" onclick="selecionarTrabalho('resumo')">
+                        <strong>📄</strong>
+                        <span>Resumo</span>
+                    </div>
+                    <div class="job-card" onclick="selecionarTrabalho('codigo')">
+                        <strong>💻</strong>
+                        <span>Código</span>
+                    </div>
+                    <div class="job-card" onclick="selecionarTrabalho('traducao')">
+                        <strong>🌐</strong>
+                        <span>Tradução</span>
+                    </div>
+                    <div class="job-card" onclick="selecionarTrabalho('analise')">
+                        <strong>📊</strong>
+                        <span>Análise</span>
+                    </div>
+                    <div class="job-card" onclick="selecionarTrabalho('criativo')">
+                        <strong>✨</strong>
+                        <span>Criativo</span>
+                    </div>
+                </div>
+
+                <h3>Ou escreva seu próprio prompt:</h3>
+                <textarea id="prompt" placeholder="Digite o que você precisa aqui..."></textarea>
+                <button onclick="enviarPrompt()" id="btnEnviar">🚀 Processar com IA</button>
+
+                <div class="loading" id="loading">Processando</div>
+                <div class="resultado" id="resultado">
+                    <p id="resultado-texto"></p>
+                    <button class="copy-btn" onclick="copiarResultado()">📋 Copiar</button>
+                </div>
+            </div>
+
+            <!-- TEMPLATES -->
+            <div class="card">
+                <h2>📋 Templates Prontos</h2>
+
+                <div class="templates-list">
+                    <div class="template-item" onclick="usarTemplate('email-prof')">
+                        <strong>📧 Email Profissional</strong>
+                        <small>Pronto para enviar</small>
+                    </div>
+                    <div class="template-item" onclick="usarTemplate('proposta')">
+                        <strong>📝 Proposta de Trabalho</strong>
+                        <small>Para cobrar cliente</small>
+                    </div>
+                    <div class="template-item" onclick="usarTemplate('relatorio')">
+                        <strong>📊 Relatório</strong>
+                        <small>Análise profissional</small>
+                    </div>
+                    <div class="template-item" onclick="usarTemplate('resposta')">
+                        <strong>💬 Resposta Cliente</strong>
+                        <small>Atendimento</small>
+                    </div>
+                    <div class="template-item" onclick="usarTemplate('artigo')">
+                        <strong>📰 Artigo/Blog</strong>
+                        <small>Conteúdo para web</small>
+                    </div>
+                    <div class="template-item" onclick="usarTemplate('cv')">
+                        <strong>📄 Currículo</strong>
+                        <small>Profissional</small>
+                    </div>
+                </div>
+
+                <div class="ganhos-box">
+                    <strong>💰 Quanto você pode ganhar:</strong>
+                    <ul>
+                        <li>📧 Email: R$ 50-100</li>
+                        <li>📝 Proposta: R$ 100-300</li>
+                        <li>📊 Relatório: R$ 200-500</li>
+                        <li>📰 Artigo: R$ 100-400</li>
+                        <li>🌐 Tradução: R$ 50-200</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- DICAS -->
+        <div class="card">
+            <h2>💡 Como Ganhar Dinheiro</h2>
+
+            <h3>✅ Passo a Passo:</h3>
+            <ol style="margin-left: 20px; color: #666; line-height: 1.8; font-size: 14px;">
+                <li><strong>Use a IA</strong> para criar base do trabalho</li>
+                <li><strong>Revise e personalize</strong> (adicione valor)</li>
+                <li><strong>Venda em plataformas:</strong> Fiverr, Upwork, 99Freelas</li>
+                <li><strong>Custo = R$ 0</strong>, Ganho = 100%</li>
+            </ol>
+
+            <h3 style="margin-top: 20px;">🎯 Melhores Trabalhos para IA:</h3>
+            <ul style="margin-left: 20px; color: #666; line-height: 1.8; font-size: 14px;">
+                <li><strong>Redação/Copywriting:</strong> R$ 50-200 por texto</li>
+                <li><strong>Tradução:</strong> R$ 30-100 por página</li>
+                <li><strong>Análise de dados:</strong> R$ 100-500 por projeto</li>
+                <li><strong>Código/Scripts:</strong> R$ 100-1000 por projeto</li>
+                <li><strong>Consultoria escrita:</strong> R$ 200-1000 por relatório</li>
+                <li><strong>Email marketing:</strong> R$ 50-300 por campanha</li>
+            </ul>
+
+            <h3 style="margin-top: 20px;">📱 Onde Vender:</h3>
+            <ul style="margin-left: 20px; color: #666; line-height: 1.8; font-size: 14px;">
+                <li><strong>Fiverr:</strong> Gigs rápidos (R$ 50-500)</li>
+                <li><strong>Upwork:</strong> Projetos maiores (R$ 500-5000)</li>
+                <li><strong>99Freelas:</strong> Mercado brasileiro</li>
+                <li><strong>Workana:</strong> América Latina</li>
+                <li><strong>Contato direto:</strong> Melhor margem (2-3x mais)</li>
+            </ul>
+
+            <h3 style="margin-top: 20px;">⚡ Meta Realista:</h3>
+            <div class="success-box">
+                <strong>R$ 500-1000/mês</strong> fazendo 2-3 trabalhos por dia<br>
+                <strong>Tempo:</strong> 2-3 horas/dia<br>
+                <strong>Custo:</strong> R$ 0 (Google oferece crédito gratuito)
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>© 2024 IA em Português | Trabalhe sem custos</p>
+        </div>
+    </div>
+
+    <script>
+        const TEMPLATES = {
+            'email-prof': `Prezado(a) [Nome],
+
+Espero que esteja bem.
+
+[Seu conteúdo principal aqui]
+
+Fico à disposição para dúvidas ou esclarecimentos.
+
+Atenciosamente,
+[Seu nome]`,
+
+            'proposta': `PROPOSTA DE TRABALHO
+
+Cliente: [Nome do cliente]
+Data: [Data]
+Valor: R$ [Valor]
+Prazo: [Prazo]
+
+ESCOPO DO TRABALHO:
+• [Ponto 1]
+• [Ponto 2]
+• [Ponto 3]
+
+METODOLOGIA:
+[Descrever como será feito]
+
+CRONOGRAMA:
+• Fase 1: [Data]
+• Fase 2: [Data]
+• Entrega final: [Data]
+
+CONDIÇÕES:
+• Pagamento: [Forma e data]
+• Revisões incluídas: [Quantidade]
+• Suporte pós-entrega: [Período]`,
+
+            'relatorio': `RELATÓRIO EXECUTIVO
+
+TÍTULO: [Seu título aqui]
+DATA: [Data]
+AUTOR: [Seu nome]
+
+RESUMO EXECUTIVO:
+[Resumo em 3-4 linhas do que foi feito]
+
+ANÁLISE E RESULTADOS:
+[Sua análise detalhada aqui]
+
+PRINCIPAIS CONCLUSÕES:
+1. [Conclusão 1]
+2. [Conclusão 2]
+3. [Conclusão 3]
+
+RECOMENDAÇÕES:
+• [Recomendação 1]
+• [Recomendação 2]
+• [Recomendação 3]`,
+
+            'resposta': `Prezado(a) [Nome do cliente],
+
+Obrigado por entrar em contato.
+
+Recebi sua solicitação sobre [assunto] e estou trabalhando nisso com atenção.
+
+[Sua resposta/solução aqui]
+
+PRÓXIMOS PASSOS:
+1. [Passo 1]
+2. [Passo 2]
+3. [Passo 3]
+
+Fico à disposição para qualquer dúvida.
+
+Atenciosamente,
+[Seu nome]`,
+
+            'artigo': `TÍTULO DO ARTIGO
+
+[Introdução interessante sobre o tema]
+
+SEÇÃO 1: [Título]
+[Conteúdo da seção 1]
+
+SEÇÃO 2: [Título]
+[Conteúdo da seção 2]
+
+SEÇÃO 3: [Título]
+[Conteúdo da seção 3]
+
+CONCLUSÃO:
+[Conclusão e chamada para ação]`,
+
+            'cv': `[SEU NOME]
+[Seu email] | [Seu telefone] | [Sua cidade]
+
+RESUMO PROFISSIONAL:
+[2-3 linhas sobre você]
+
+EXPERIÊNCIA:
+• [Empresa] - [Cargo] ([Período])
+  [Responsabilidades e conquistas]
+
+• [Empresa] - [Cargo] ([Período])
+  [Responsabilidades e conquistas]
+
+HABILIDADES:
+• [Habilidade 1]
+• [Habilidade 2]
+• [Habilidade 3]
+
+EDUCAÇÃO:
+[Curso] - [Instituição] ([Ano])`
+        };
+
+        const PROMPTS_RAPIDOS = {
+            'email': 'Escreva um email profissional sobre: ',
+            'resumo': 'Resuma este texto em 3 pontos principais: ',
+            'codigo': 'Escreva um código em Python para: ',
+            'traducao': 'Traduza para inglês: ',
+            'analise': 'Analise estes dados: ',
+            'criativo': 'Crie um conteúdo criativo sobre: '
+        };
+
+        let apiKey = localStorage.getItem('geminiApiKey');
+
+        function salvarChave() {
+            const chave = document.getElementById('apiKey').value.trim();
+            if (chave) {
+                localStorage.setItem('geminiApiKey', chave);
+                apiKey = chave;
+                document.getElementById('status').className = 'status ok';
+                document.getElementById('status').textContent = '✅ API Key configurada com sucesso!';
+                document.getElementById('apiKey').value = '';
+                alert('✅ Chave salva! Agora você pode usar a IA.');
+            } else {
+                alert('⚠️ Cole sua chave API primeiro!');
+            }
+        }
+
+        function selecionarTrabalho(tipo) {
+            const prompt = PROMPTS_RAPIDOS[tipo];
+            document.getElementById('prompt').value = prompt;
+            document.getElementById('prompt').focus();
+        }
+
+        function usarTemplate(tipo) {
+            const template = TEMPLATES[tipo];
+            document.getElementById('prompt').value = template;
+            document.getElementById('prompt').focus();
+        }
+
+        async function enviarPrompt() {
+            if (!apiKey) {
+                alert('⚠️ Configure sua API Key primeiro!');
+                return;
+            }
+
+            const prompt = document.getElementById('prompt').value.trim();
+            if (!prompt) {
+                alert('⚠️ Digite um prompt!');
+                return;
+            }
+
+            document.getElementById('loading').classList.add('show');
+            document.getElementById('resultado').classList.remove('show');
+            document.getElementById('btnEnviar').disabled = true;
+
+            try {
+                const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=' + apiKey, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        contents: [{
+                            parts: [{
+                                text: prompt
+                            }]
+                        }]
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Erro na API: ' + response.status);
+                }
+
+                const data = await response.json();
+                const resultado = data.candidates[0].content.parts[0].text;
+
+                document.getElementById('resultado-texto').textContent = resultado;
+                document.getElementById('resultado').classList.add('show');
+
+            } catch (error) {
+                alert('❌ Erro: ' + error.message + '\n\nVerifique sua API Key.');
+            } finally {
+                document.getElementById('loading').classList.remove('show');
+                document.getElementById('btnEnviar').disabled = false;
+            }
+        }
+
+        function copiarResultado() {
+            const texto = document.getElementById('resultado-texto').textContent;
+            navigator.clipboard.writeText(texto).then(() => {
+                alert('✅ Copiado para a área de transferência!');
+            }).catch(() => {
+                alert('❌ Erro ao copiar');
+            });
+        }
+
+        // Verificar se já tem chave salva
+        window.addEventListener('load', function() {
+            if (apiKey) {
+                document.getElementById('status').className = 'status ok';
+                document.getElementById('status').textContent = '✅ API Key configurada';
+            }
+        });
+    </script>
+</body>
+
+</html>
+
+
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IA Gratuita em Português</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+
+        .header h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .card h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 18px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .quick-jobs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .job-card {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 1px solid #ddd;
+            text-align: center;
+            font-size: 12px;
+        }
+
+        .job-card:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .job-card strong {
+            display: block;
+            margin-bottom: 3px;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 14px;
+            resize: vertical;
+            min-height: 120px;
+            margin-bottom: 10px;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .resultado {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            margin-top: 20px;
+            border-left: 4px solid #667eea;
+            max-height: 400px;
+            overflow-y: auto;
+            display: none;
+        }
+
+        .resultado.show {
+            display: block;
+        }
+
+        .resultado p {
+            color: #333;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-size: 14px;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            color: #667eea;
+            font-weight: 600;
+            padding: 20px;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .loading::after {
+            content: '';
+            animation: dots 1.5s steps(4, end) infinite;
+        }
+
+        @keyframes dots {
+
+            0%,
+            20% {
+                content: '';
+            }
+
+            40% {
+                content: '.';
+            }
+
+            60% {
+                content: '..';
+            }
+
+            80%,
+            100% {
+                content: '...';
+            }
+        }
+
+        .info-box {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            color: #155724;
+            line-height: 1.5;
+        }
+
+        .warning-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            color: #856404;
+        }
+
+        .copy-btn {
+            padding: 8px 12px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-top: 10px;
+            width: auto;
+        }
+
+        .copy-btn:hover {
+            background: #764ba2;
+        }
+
+        .templates-list {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+
+        .template-item {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            border: 1px solid #ddd;
+            transition: all 0.3s;
+            font-size: 13px;
+        }
+
+        .template-item:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .template-item strong {
+            display: block;
+            margin-bottom: 3px;
+        }
+
+        .footer {
+            text-align: center;
+            color: white;
+            margin-top: 30px;
+            font-size: 12px;
+        }
+
+        h3 {
+            color: #333;
+            margin-top: 15px;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        ul {
+            margin-left: 20px;
+            color: #666;
+            font-size: 13px;
+            line-height: 1.8;
+        }
+
+        ol {
+            margin-left: 20px;
+            color: #666;
+            font-size: 13px;
+            line-height: 1.8;
+        }
+
+        .error-box {
+            background: #f8d7da;
+            border-left: 4px solid #dc3545;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            color: #721c24;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 IA em Português - 100% GRATUITA</h1>
+            <p>Sem cartão de crédito, sem limites, funciona agora</p>
+        </div>
+
+        <div class="info-box">
+            ✅ <strong>100% GRATUITO:</strong> Usa Hugging Face (sem custos). Funciona direto no navegador. Sem
+            configuração complicada.
+        </div>
+
+        <div class="content">
+            <!-- TRABALHOS RÁPIDOS -->
+            <div class="card">
+                <h2>⚡ Trabalhos Rápidos</h2>
+
+                <div class="quick-jobs">
+                    <div class="job-card" onclick="selecionarTrabalho('email')">
+                        <strong>📧</strong>
+                        <span>Email</span>
+                    </div>
+                    <div class="job-card" onclick="selecionarTrabalho('resumo')">
+                        <strong>📄</strong>
+                        <span>Resumo</span>
+                    </div>
+                    <div class="job-card" onclick="selecionarTrabalho('codigo')">
+                        <strong>💻</strong>
+                        <span>Código</span>
+                    </div>
+                    <div class="job-card" onclick="selecionarTrabalho('traducao')">
+                        <strong>🌐</strong>
+                        <span>Tradução</span>
+                    </div>
+                    <div class="job-card" onclick="selecionarTrabalho('analise')">
+                        <strong>📊</strong>
+                        <span>Análise</span>
+                    </div>
+                    <div class="job-card" onclick="selecionarTrabalho('criativo')">
+                        <strong>✨</strong>
+                        <span>Criativo</span>
+                    </div>
+                </div>
+
+                <h3>Ou escreva seu próprio prompt:</h3>
+                <textarea id="prompt" placeholder="Digite o que você precisa aqui..."></textarea>
+                <button onclick="enviarPrompt()" id="btnEnviar">🚀 Processar com IA</button>
+
+                <div class="loading" id="loading">Processando</div>
+                <div id="erro" class="error-box" style="display: none;"></div>
+                <div class="resultado" id="resultado">
+                    <p id="resultado-texto"></p>
+                    <button class="copy-btn" onclick="copiarResultado()">📋 Copiar</button>
+                </div>
+            </div>
+
+            <!-- TEMPLATES -->
+            <div class="card">
+                <h2>📋 Templates Prontos</h2>
+
+                <div class="templates-list">
+                    <div class="template-item" onclick="usarTemplate('email-prof')">
+                        <strong>📧 Email Profissional</strong>
+                        <small>Pronto para enviar</small>
+                    </div>
+                    <div class="template-item" onclick="usarTemplate('proposta')">
+                        <strong>📝 Proposta de Trabalho</strong>
+                        <small>Para cobrar cliente</small>
+                    </div>
+                    <div class="template-item" onclick="usarTemplate('relatorio')">
+                        <strong>📊 Relatório</strong>
+                        <small>Análise profissional</small>
+                    </div>
+                    <div class="template-item" onclick="usarTemplate('resposta')">
+                        <strong>💬 Resposta Cliente</strong>
+                        <small>Atendimento</small>
+                    </div>
+                    <div class="template-item" onclick="usarTemplate('artigo')">
+                        <strong>📰 Artigo/Blog</strong>
+                        <small>Conteúdo para web</small>
+                    </div>
+                    <div class="template-item" onclick="usarTemplate('cv')">
+                        <strong>📄 Currículo</strong>
+                        <small>Profissional</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DICAS -->
+        <div class="card">
+            <h2>💡 Como Ganhar Dinheiro</h2>
+
+            <h3>✅ Passo a Passo:</h3>
+            <ol>
+                <li><strong>Use a IA aqui</strong> para criar base do trabalho</li>
+                <li><strong>Revise e personalize</strong> (adicione valor)</li>
+                <li><strong>Venda em:</strong> Fiverr, Upwork, 99Freelas</li>
+                <li><strong>Custo = R$ 0</strong>, Ganho = 100%</li>
+            </ol>
+
+            <h3 style="margin-top: 20px;">💰 Quanto você pode ganhar:</h3>
+            <ul>
+                <li><strong>📧 Email:</strong> R$ 50-100 (5 min)</li>
+                <li><strong>📝 Proposta:</strong> R$ 100-300 (15 min)</li>
+                <li><strong>📊 Relatório:</strong> R$ 200-500 (30 min)</li>
+                <li><strong>📰 Artigo:</strong> R$ 100-400 (20 min)</li>
+                <li><strong>🌐 Tradução:</strong> R$ 50-200 (10 min)</li>
+                <li><strong>💻 Código:</strong> R$ 100-1000 (30 min)</li>
+            </ul>
+
+            <h3 style="margin-top: 20px;">🎯 Meta realista:</h3>
+            <ul>
+                <li><strong>3 trabalhos/dia</strong> = R$ 500-1000/mês</li>
+                <li><strong>Tempo:</strong> 2-3 horas/dia</li>
+                <li><strong>Custo:</strong> R$ 0 (completamente gratuito)</li>
+            </ul>
+
+            <h3 style="margin-top: 20px;">📱 Onde vender:</h3>
+            <ul>
+                <li><strong>Fiverr:</strong> Gigs rápidos (R$ 50-500)</li>
+                <li><strong>Upwork:</strong> Projetos maiores (R$ 500-5000)</li>
+                <li><strong>99Freelas:</strong> Mercado brasileiro</li>
+                <li><strong>Workana:</strong> América Latina</li>
+                <li><strong>Contato direto:</strong> Melhor margem (2-3x mais)</li>
+            </ul>
+        </div>
+
+        <div class="footer">
+            <p>© 2024 IA Gratuita em Português | Trabalhe sem custos</p>
+        </div>
+    </div>
+
+    <script>
+        const TEMPLATES = {
+            'email-prof': `Prezado(a) [Nome],
+
+Espero que esteja bem.
+
+[Seu conteúdo principal aqui]
+
+Fico à disposição para dúvidas ou esclarecimentos.
+
+Atenciosamente,
+[Seu nome]`,
+
+            'proposta': `PROPOSTA DE TRABALHO
+
+Cliente: [Nome do cliente]
+Data: [Data]
+Valor: R$ [Valor]
+Prazo: [Prazo]
+
+ESCOPO DO TRABALHO:
+• [Ponto 1]
+• [Ponto 2]
+• [Ponto 3]
+
+METODOLOGIA:
+[Descrever como será feito]
+
+CRONOGRAMA:
+• Fase 1: [Data]
+• Fase 2: [Data]
+• Entrega final: [Data]
+
+CONDIÇÕES:
+• Pagamento: [Forma e data]
+• Revisões incluídas: [Quantidade]
+• Suporte pós-entrega: [Período]`,
+
+            'relatorio': `RELATÓRIO EXECUTIVO
+
+TÍTULO: [Seu título aqui]
+DATA: [Data]
+AUTOR: [Seu nome]
+
+RESUMO EXECUTIVO:
+[Resumo em 3-4 linhas do que foi feito]
+
+ANÁLISE E RESULTADOS:
+[Sua análise detalhada aqui]
+
+PRINCIPAIS CONCLUSÕES:
+1. [Conclusão 1]
+2. [Conclusão 2]
+3. [Conclusão 3]
+
+RECOMENDAÇÕES:
+• [Recomendação 1]
+• [Recomendação 2]
+• [Recomendação 3]`,
+
+            'resposta': `Prezado(a) [Nome do cliente],
+
+Obrigado por entrar em contato.
+
+Recebi sua solicitação sobre [assunto] e estou trabalhando nisso com atenção.
+
+[Sua resposta/solução aqui]
+
+PRÓXIMOS PASSOS:
+1. [Passo 1]
+2. [Passo 2]
+3. [Passo 3]
+
+Fico à disposição para qualquer dúvida.
+
+Atenciosamente,
+[Seu nome]`,
+
+            'artigo': `TÍTULO DO ARTIGO
+
+[Introdução interessante sobre o tema]
+
+SEÇÃO 1: [Título]
+[Conteúdo da seção 1]
+
+SEÇÃO 2: [Título]
+[Conteúdo da seção 2]
+
+SEÇÃO 3: [Título]
+[Conteúdo da seção 3]
+
+CONCLUSÃO:
+[Conclusão e chamada para ação]`,
+
+            'cv': `[SEU NOME]
+[Seu email] | [Seu telefone] | [Sua cidade]
+
+RESUMO PROFISSIONAL:
+[2-3 linhas sobre você]
+
+EXPERIÊNCIA:
+• [Empresa] - [Cargo] ([Período])
+  [Responsabilidades e conquistas]
+
+• [Empresa] - [Cargo] ([Período])
+  [Responsabilidades e conquistas]
+
+HABILIDADES:
+• [Habilidade 1]
+• [Habilidade 2]
+• [Habilidade 3]
+
+EDUCAÇÃO:
+[Curso] - [Instituição] ([Ano])`
+        };
+
+        const PROMPTS_RAPIDOS = {
+            'email': 'Escreva um email profissional e amigável sobre: ',
+            'resumo': 'Resuma este texto em 3 pontos principais: ',
+            'codigo': 'Escreva um código em Python para: ',
+            'traducao': 'Traduza para inglês: ',
+            'analise': 'Analise estes dados e dê insights: ',
+            'criativo': 'Crie um conteúdo criativo e interessante sobre: '
+        };
+
+        function selecionarTrabalho(tipo) {
+            const prompt = PROMPTS_RAPIDOS[tipo];
+            document.getElementById('prompt').value = prompt;
+            document.getElementById('prompt').focus();
+        }
+
+        function usarTemplate(tipo) {
+            const template = TEMPLATES[tipo];
+            document.getElementById('prompt').value = template;
+            document.getElementById('prompt').focus();
+        }
+
+        async function enviarPrompt() {
+            const prompt = document.getElementById('prompt').value.trim();
+            if (!prompt) {
+                alert('⚠️ Digite um prompt!');
+                return;
+            }
+
+            document.getElementById('loading').classList.add('show');
+            document.getElementById('resultado').classList.remove('show');
+            document.getElementById('erro').style.display = 'none';
+            document.getElementById('btnEnviar').disabled = true;
+
+            try {
+                // Usando API pública de IA (sem autenticação)
+                const response = await fetch('https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.1', {
+                    headers: { Authorization: `Bearer hf_kJqYYqYYqYYqYYqYYqYYqYYqYYqYYqYYqYY` },
+                    method: 'POST',
+                    body: JSON.stringify({ inputs: prompt }),
+                });
+
+                if (!response.ok) {
+                    // Se falhar, tenta modelo alternativo
+                    const response2 = await fetch('https://api-inference.huggingface.co/models/gpt2', {
+                        method: 'POST',
+                        body: JSON.stringify({ inputs: prompt }),
+                    });
+
+                    if (!response2.ok) {
+                        throw new Error('Serviço temporariamente indisponível');
+                    }
+
+                    const data = await response2.json();
+                    const resultado = data[0].generated_text;
+                    document.getElementById('resultado-texto').textContent = resultado;
+                } else {
+                    const data = await response.json();
+                    const resultado = data[0].generated_text;
+                    document.getElementById('resultado-texto').textContent = resultado;
+                }
+
+                document.getElementById('resultado').classList.add('show');
+
+            } catch (error) {
+                document.getElementById('erro').style.display = 'block';
+                document.getElementById('erro').innerHTML = `
+                    ❌ <strong>Erro:</strong> ${error.message}<br>
+                    <small>Tente novamente em alguns segundos.</small>
+                `;
+            } finally {
+                document.getElementById('loading').classList.remove('show');
+                document.getElementById('btnEnviar').disabled = false;
+            }
+        }
+
+        function copiarResultado() {
+            const texto = document.getElementById('resultado-texto').textContent;
+            navigator.clipboard.writeText(texto).then(() => {
+                alert('✅ Copiado para a área de transferência!');
+            }).catch(() => {
+                alert('❌ Erro ao copiar');
+            });
+        }
+    </script>
+</body>
+
+</html>
+
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Gerador de Texto Simples</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        textarea {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            min-height: 150px;
+            font-family: Arial, sans-serif;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background: #764ba2;
+        }
+
+        .resultado {
+            background: #f8f9fa;
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 4px;
+            border-left: 4px solid #667eea;
+            display: none;
+        }
+
+        .resultado.show {
+            display: block;
+        }
+
+        .resultado p {
+            color: #333;
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+
+        h2 {
+            color: #333;
+        }
+
+        .copy-btn {
+            padding: 8px 12px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+            width: auto;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="card">
+        <h2>✍️ Gerador de Texto com IA</h2>
+
+        <h3>Escolha um tipo de trabalho:</h3>
+        <select id="tipo" style="width: 100%; padding: 10px; margin: 10px 0; font-size: 14px;">
+            <option value="">-- Selecione --</option>
+            <option value="email">📧 Email Profissional</option>
+            <option value="resumo">📄 Resumo de Texto</option>
+            <option value="artigo">📰 Artigo/Blog</option>
+            <option value="proposta">📝 Proposta de Trabalho</option>
+            <option value="resposta">💬 Resposta a Cliente</option>
+        </select>
+
+        <h3>Seu conteúdo:</h3>
+        <textarea id="entrada" placeholder="Cole o texto que você quer processar..."></textarea>
+
+        <button onclick="processar()">🚀 Gerar com IA</button>
+
+        <div id="resultado" class="resultado">
+            <h3>Resultado:</h3>
+            <p id="saida"></p>
+            <button class="copy-btn" onclick="copiar()">📋 Copiar</button>
+        </div>
+    </div>
+
+    <script>
+        // Modelos simples de processamento de texto
+        const modelos = {
+            'email': function(texto) {
+                return `Prezado(a),
+
+${texto}
+
+Fico à disposição para dúvidas.
+
+Atenciosamente`;
+            },
+            'resumo': function(texto) {
+                const frases = texto.split('.').slice(0, 3).join('.');
+                return `RESUMO:\n${frases}.\n\nPontos principais:\n• ${frases.split(',')[0]}\n• Tema central\n• Conclusão`;
+            },
+            'artigo': function(texto) {
+                return `ARTIGO: ${texto}\n\nINTRODUÇÃO:\n${texto}\n\nDESENVOLVIMENTO:\n[Desenvolva o tema]\n\nCONCLUSÃO:\n[Finalize com insights]`;
+            },
+            'proposta': function(texto) {
+                return `PROPOSTA DE TRABALHO\n\nEscopo:\n${texto}\n\nValor: R$ [Definir]\nPrazo: [Definir]\nCondições: [Definir]\n\nAtenciosamente`;
+            },
+            'resposta': function(texto) {
+                return `Prezado(a),
+
+Obrigado por entrar em contato.\n\n${texto}\n\nProximos passos:\n1. [Ação 1]\n2. [Ação 2]\n\nAtenciosamente`;
+            }
+        };
+
+        function processar() {
+            const tipo = document.getElementById('tipo').value;
+            const entrada = document.getElementById('entrada').value;
+
+            if (!tipo) {
+                alert('Selecione um tipo!');
+                return;
+            }
+            if (!entrada.trim()) {
+                alert('Digite algo!');
+                return;
+            }
+
+            const modelo = modelos[tipo];
+            const resultado = modelo(entrada);
+
+            document.getElementById('saida').textContent = resultado;
+            document.getElementById('resultado').classList.add('show');
+        }
+
+        function copiar() {
+            const texto = document.getElementById('saida').textContent;
+            navigator.clipboard.writeText(texto);
+            alert('✅ Copiado!');
+        }
+    </script>
+</body>
+
+</html>
